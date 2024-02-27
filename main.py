@@ -51,6 +51,7 @@ async def get_branch():
     }
     all_branch_list = []
     key_branch_list = []
+    cali_branch_list = []
 
     url = 'https://www.dolex.com/wp-admin/admin-ajax.php'
 
@@ -70,21 +71,22 @@ async def get_branch():
                         with open(f'branch_data.json', 'w') as f:
                             json.dump(data, f, indent=4)
                             print(f"Data cached to branch_data.json")
-                        # Using the JSON output, extract the branch title, street, city, state and postal code
+                        # Using the JSON output, extract the branch title, street, city, state and postal code only where state is 'California'.
                         for branch in data:
-                            StoreName = branch['title']
-                            Address = branch['street']
-                            CityName = branch['city']
-                            State = branch['state']
-                            ZipCode = branch['postal_code']
-                            key_branch_list.append(f"{StoreName}, {Address}, {CityName}, {State}, {ZipCode}")
+                            if branch['state'] == 'California':
+                                StoreName = branch['title']
+                                Address = branch['street']
+                                CityName = branch['city']
+                                State = branch['state']
+                                ZipCode = branch['postal_code']
+                                cali_branch_list.append(f"{StoreName}, {Address}, {CityName}, {State}, {ZipCode}")
 
-                        # Save the key_branch_list to a file
-                        with open('key_branch_list.txt', 'w') as f:
-                            for branch in key_branch_list:
+                        # Save the cali_branch_list to a file
+                        with open('cali_branch_list.txt', 'w') as f:
+                            for branch in cali_branch_list:
                                 f.write(f'{branch}\n')
                         # prints the length of the list
-                        print("Length of KEY BRANCHES: ", len(key_branch_list))
+                        print("Length of CALI BRANCHES: ", len(cali_branch_list))
                     else:
                         print(f"Received error response: {response.status_code}")
                 else:
