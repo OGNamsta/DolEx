@@ -1,6 +1,7 @@
 import asyncio
 import httpx
 import json
+import openpyxl
 from time import perf_counter
 from aiolimiter import AsyncLimiter
 
@@ -11,6 +12,20 @@ async def log_request(request):
 
 async def log_response(response):
     print(f"Response: {response.url!r} {response.status_code!r}")
+
+
+# Create a function to save California branches to an Excel file
+async def save_to_excel(cali_branch_list):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    header = ['StoreName', 'Address', 'CityName', 'State', 'ZipCode']
+    sheet.append(header)
+    for branch in cali_branch_list:
+        StoreName, Address, CityName, State, ZipCode = branch.split(', ')
+        sheet.append([StoreName, Address, CityName, State, ZipCode])
+    workbook.save('cali_branches.xlsx')
+    print(f"Data saved to cali_branches.xlsx")
+
 
 
 async def get_branch():
@@ -80,6 +95,8 @@ async def get_branch():
                                 State = branch['state']
                                 ZipCode = branch['postal_code']
                                 cali_branch_list.append(f"{StoreName}, {Address}, {CityName}, {State}, {ZipCode}")
+                        # Save the cali_branch_list to an Excel file
+                        await save_to_excel(cali_branch_list)
 
                         # Save the cali_branch_list to a file
                         with open('cali_branch_list.txt', 'w') as f:
@@ -87,6 +104,7 @@ async def get_branch():
                                 f.write(f'{branch}\n')
                         # prints the length of the list
                         print("Length of CALI BRANCHES: ", len(cali_branch_list))
+
                     else:
                         print(f"Received error response: {response.status_code}")
                 else:
