@@ -49,7 +49,8 @@ async def get_branch():
         'load_all': '1',
         'layout': '1',
     }
-    branch_list = []
+    all_branch_list = []
+    key_branch_list = []
 
     url = 'https://www.dolex.com/wp-admin/admin-ajax.php'
 
@@ -64,11 +65,26 @@ async def get_branch():
                     if 'text/html' in content_type:
                         data = response.json()
                         # Extract the branch data
-                        branch_list.extend(data)
+                        all_branch_list.extend(data)
                         # Cache the JSON output to a file
                         with open(f'branch_data.json', 'w') as f:
                             json.dump(data, f, indent=4)
                             print(f"Data cached to branch_data.json")
+                        # Using the JSON output, extract the branch title, street, city, state and postal code
+                        for branch in data:
+                            StoreName = branch['title']
+                            Address = branch['street']
+                            CityName = branch['city']
+                            State = branch['state']
+                            ZipCode = branch['postal_code']
+                            key_branch_list.append(f"{StoreName}, {Address}, {CityName}, {State}, {ZipCode}")
+
+                        # Save the key_branch_list to a file
+                        with open('key_branch_list.txt', 'w') as f:
+                            for branch in key_branch_list:
+                                f.write(f'{branch}\n')
+                        # prints the length of the list
+                        print("Length of KEY BRANCHES: ", len(key_branch_list))
                     else:
                         print(f"Received error response: {response.status_code}")
                 else:
@@ -77,11 +93,11 @@ async def get_branch():
                 print(f"Received error response: {response.status_code}")
         # Save the branch_list to a file
         with open('branch_list.txt', 'w') as f:
-            for branch in branch_list:
+            for branch in all_branch_list:
                 f.write(f'{branch}\n')
         # prints the length of the list
-        print(len(branch_list))
-        return branch_list
+        print("Length of ALL BRANCHES: ", len(all_branch_list))
+        return all_branch_list
 
 
 async def main():
